@@ -3,17 +3,29 @@ package com.github.swiftech.swstate;
 import java.io.Serializable;
 
 /**
- * Represents an action that triggers the state from one to another.
+ * Defines an action that trigger the state from one to another.
  *
+ * @param <S> type of State
  * @author swiftech
  */
-public class Action<T extends Serializable> {
+public class Action<S extends Serializable> {
 
+    /**
+     * Name of the action.
+     */
     private String name;
-    private T stateFrom;
-    private T stateTo;
 
-    public Action(String name, T stateFrom, T stateTo) {
+    /**
+     * The state before the action happens.
+     */
+    private S stateFrom;
+
+    /**
+     * The state after the action happens.
+     */
+    private S stateTo;
+
+    public Action(String name, S stateFrom, S stateTo) {
         this.name = name;
         this.stateFrom = stateFrom;
         this.stateTo = stateTo;
@@ -27,19 +39,19 @@ public class Action<T extends Serializable> {
         this.name = name;
     }
 
-    public T getStateFrom() {
+    public S getStateFrom() {
         return stateFrom;
     }
 
-    public void setStateFrom(T stateFrom) {
+    public void setStateFrom(S stateFrom) {
         this.stateFrom = stateFrom;
     }
 
-    public T getStateTo() {
+    public S getStateTo() {
         return stateTo;
     }
 
-    public void setStateTo(T stateTo) {
+    public void setStateTo(S stateTo) {
         this.stateTo = stateTo;
     }
 }

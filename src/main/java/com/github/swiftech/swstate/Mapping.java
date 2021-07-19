@@ -8,6 +8,10 @@ import java.util.Map;
 
 /**
  * Mapping state and processes
+ *
+ * @param <S> type of State
+ * @param <P> type of Payload
+ * @author swiftech
  */
 public class Mapping<S extends Serializable, P extends Serializable> {
 

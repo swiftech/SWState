@@ -5,6 +5,7 @@ import java.io.Serializable;
 /**
  * State provider let you implement your own state provider to store and retrieve states.
  *
+ * @param <S> type of state object
  * @author swiftech
  */
 public interface StateProvider<S extends Serializable> {

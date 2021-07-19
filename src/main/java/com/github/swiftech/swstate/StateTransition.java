@@ -27,17 +27,18 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
     protected Mapping<S, P> stateMapping;
 
     /**
-     * Build the state transition with {@link StateBuilder}
+     * Construct state transition with state builder.
      *
      * @param stateBuilder
      */
-    public void build(StateBuilder<S, P> stateBuilder) {
+    public StateTransition(StateBuilder<S, P> stateBuilder) {
         this.actionMap = stateBuilder.actionMap;
         this.stateMapping = stateBuilder.stateMapping;
     }
 
     /**
      * Start the state transition with initial state.
+     *
      * @return the initial state
      */
     public S start() {
@@ -46,6 +47,7 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
 
     /**
      * Start the state transition with initial state and payload.
+     *
      * @param payload
      * @return the initial state
      */

@@ -10,6 +10,8 @@ import static com.github.swiftech.swstate.Mapping.*;
 /**
  * Builds states with actions and transition processing.
  *
+ * @param <S> type of State
+ * @param <P> type of Payload
  * @author swiftech
  * @see StateTransition
  */
@@ -50,8 +52,8 @@ public class StateBuilder<S extends Serializable, P extends Serializable> {
      * Add an action from one state to another.
      *
      * @param name
-     * @param stateFrom state in which action happens
-     * @param stateTo   state to which action happens
+     * @param stateFrom the state before the action happens.
+     * @param stateTo   the state after the action happens.
      * @return
      */
     public StateBuilder<S, P> action(String name, S stateFrom, S stateTo) {
@@ -90,9 +92,9 @@ public class StateBuilder<S extends Serializable, P extends Serializable> {
         return false;
     }
 
-
     /**
-     * With state to build IN and OUT processing.
+     * With state to build transition processing.
+     * after this method, call {@code in()} and {@code out()} to define processes for this state.
      *
      * @param state
      * @return
@@ -103,7 +105,7 @@ public class StateBuilder<S extends Serializable, P extends Serializable> {
     }
 
     /**
-     * Add {@code Process} which will be executed before entering a state.
+     * Add {@link Process} which will be executed before entering a state.
      * Use {@code state()} method to specify a state before calling this method.
      *
      * @param process
@@ -117,7 +119,7 @@ public class StateBuilder<S extends Serializable, P extends Serializable> {
     }
 
     /**
-     * Add {@code Process} which will be executed after exiting a state.
+     * Add {@link Process} which will be executed after exiting a state.
      * Use {@code state()} method to specify a state before calling this method.
      *
      * @param process

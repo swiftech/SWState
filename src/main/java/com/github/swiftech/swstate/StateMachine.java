@@ -10,7 +10,7 @@ import java.io.Serializable;
  * It must starts from the initial state, which was specified by methods {@code initialize()} of {@link StateBuilder},
  * and transit states exactly as the rules built by {@link StateBuilder}. Multiple state cycles is supported by
  * giving an {@code id} to methods to differentiate them .
- *
+ * <p>
  * Usage:
  * <pre>
  *     1. Construct {@link StateMachine} with (default) or without {@link StateProvider}.
@@ -27,35 +27,35 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
 
     private final Logger log = LoggerFactory.getLogger(StateMachine.class);
 
-    private final StateTransition<S, P> stateTransition = new StateTransition<>();
+    private final StateTransition<S, P> stateTransition;
 
     private StateProvider<S> stateProvider;
 
     /**
-     * Construct state machine with default state provider.
+     * Construct state machine with state builder and default state provider.
      */
-    public StateMachine() {
+    public StateMachine(StateBuilder<S, P> stateBuilder) {
+        this.stateTransition = new StateTransition<>(stateBuilder);
         this.stateProvider = new DefaultStateProvider<>();
     }
 
     /**
-     * Construct state machine with customized state provider.
+     * Construct state machine with state builder and  customized state provider.
      *
      * @param stateProvider
      */
-    public StateMachine(StateProvider<S> stateProvider) {
-        this.stateProvider = stateProvider;
-    }
-
-    public void setStateProvider(StateProvider<S> stateProvider) {
+    public StateMachine(StateBuilder<S, P> stateBuilder, StateProvider<S> stateProvider) {
+        this.stateTransition = new StateTransition<>(stateBuilder);
         this.stateProvider = stateProvider;
     }
 
     /**
-     * @param stateBuilder
+     * Set user customized state provider.
+     *
+     * @param stateProvider
      */
-    public void build(StateBuilder<S, P> stateBuilder) {
-        this.stateTransition.build(stateBuilder);
+    public void setStateProvider(StateProvider<S> stateProvider) {
+        this.stateProvider = stateProvider;
     }
 
     /**
@@ -104,7 +104,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      *
      * @param id
      */
-    public void start(String id){
+    public void start(String id) {
         this.start(id, null);
     }
 

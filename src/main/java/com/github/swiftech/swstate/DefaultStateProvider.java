@@ -7,6 +7,7 @@ import java.util.Map;
 /**
  * Default state provider that stores states in memory.
  *
+ * @param <S> type of State
  * @author swiftech
  */
 public class DefaultStateProvider<S extends Serializable> implements StateProvider<S> {

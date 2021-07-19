@@ -10,20 +10,19 @@ class StateTransitionTest {
 
     @Test
     public void testSimple() {
-        StateBuilder<String, String> bus = new StateBuilder<>();
-        bus.initialize("first")
+        StateBuilder<String, String> stateBuilder = new StateBuilder<>();
+        stateBuilder.initialize("first")
                 .action("", "first", "second");
-        bus.state("first").in(payload -> {
+        stateBuilder.state("first").in(payload -> {
             System.out.println("First");
         }).state("second").in(payload -> {
             System.out.println("Second");
         });
         //
-        System.out.println(bus.hasRoute(null, "first"));
-        StateTransition<String, String> transition = new StateTransition<>();
-        transition.build(bus);
+        System.out.println(stateBuilder.hasRoute(null, "first"));
+        StateTransition<String, String> transition = new StateTransition<>(stateBuilder);
         transition.start();
-        System.out.println(bus.hasRoute("first", "second"));
+        System.out.println(stateBuilder.hasRoute("first", "second"));
         transition.post("first", "second");
         Assertions.assertThrows(Exception.class, () -> transition.post("second", "first"));
     }
@@ -54,9 +53,7 @@ class StateTransitionTest {
                     System.out.printf("STATE [%s] IN: %s%n", s3, payload);
                 });
 
-        StateTransition<String, String> transition = new StateTransition<>();
-        transition.build(stateBuilder);
-
+        StateTransition<String, String> transition = new StateTransition<>(stateBuilder);
         Assertions.assertThrows(RuntimeException.class, () -> {
             transition.startState(s2, "try to start");
         },"Start at non-initial state");
