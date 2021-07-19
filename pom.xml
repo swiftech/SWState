@@ -64,7 +64,6 @@
     </dependencies>
 
     <build>
-        <finalName>${project.name}</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -158,7 +157,7 @@
     </scm>
     <developers>
         <developer>
-            <name>SWState</name>
+            <name>swiftech</name>
             <email>awsksupport@gmail.com</email>
             <organization>swiftech</organization>
         </developer>
