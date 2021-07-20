@@ -4,15 +4,13 @@ A really simple but useful state machine implementation based on Java 8 with zer
 
 # Usage
 
-### StateMachine
-
 Assume that we have a turnstile with 2 states `Locked`, `Unlocked` and 2 actions `Coin`, `Push`, just like the diagram shows:
 
 ![](docs/state_machine1.png)
 
-* Build the `StateMachine`
+### Build the `StateMachine`
   
-  Before using `StateMachine` you should set it up by define Actions and Process with `StateBuilder`:
+  Before using `StateMachine` you must set it up by defining Actions and Process with `StateBuilder`:
   
 ```java
 StateBuilder<String, Serializable> stateBuilder = new StateBuilder<>();
@@ -32,14 +30,15 @@ stateBuilder
         .action("push_unlocked", "Unlocked", "Locked")
         .action("coin_unlocked", "Unlocked", "Unlocked")
         .action("push_unlocked", "Locked", "Locked");
-StateMachine<String, Serializable> stateMachine = new StateMachine<>();
-stateMachine.build(stateBuilder);
+StateMachine<String, Serializable> stateMachine = new StateMachine<>(stateBuilder);
 ```
+
 As you can see, we have set up 2 states and 4 actions to change states.
 the method `in()` bind your actual processing code block
 
 
-* Use `StateMachine` to transit states as per previous definitions. 
+### Use `StateMachine` to transit states as per previous definitions. 
+
 ```java
 String id = "turnstile";
 stateMachine.start(id);
@@ -51,9 +50,10 @@ stateMachine.post(id, "Locked");
 
 > The parameter `id` of `start()` or `post()` identifies  
 
-### More
 
-The `StateMachine` stores stats in memory by default, if you want to store states into other storage like database or nosql,
+# Advantage
+
+The `StateMachine` stores states in memory by default, if you want to store states into other storage like database or nosql,
 there are 2 ways to get this done, implement a `StateProvide` or use `StateTransition` directly.
 
 Example:
@@ -61,38 +61,47 @@ Assume that we have a simplified online shopping order processing with some orde
 
 ![](docs/state_machine2.png)
 
+defined states
+
+```java
+final String STATE_CREATED = "Created";
+final String STATE_PAYED = "Payed";
+final String STATE_CANCELED = "Canceled";
+final String STATE_RECEIVED = "Received";
+```
+
 Set up Actions and Process with `StateBuilder`:
 
 ```java
-StateBuilder<String, Serializable> stateBuilder = new StateBuilder<>();
+StateBuilder<String, Order> stateBuilder = new StateBuilder<>();
 stateBuilder
-.state("Created")
-.in(p -> {
-// Handle the order is created .
-})
-.state("Payed")
-.in(p -> {
-// Handle the order is payed.
-})
-.state("Canceled")
-.in(p -> {
-// Handle the order is canceled
-})
-.state("Received")
-.in(p->{
-// Handle the delivery is received
-})
-.initialize("create order", "Created")
-.action("pay order", "Created", "Payed")
-.action("cancel order", "Created", "Canceled")
-.action("deliver goods", "Payed", "Received");
+    .state(STATE_CREATED)
+    .in(order -> {
+    // Handle the order is created .
+    })
+    .state(STATE_PAYED)
+    .in(order -> {
+    // Handle the order is payed.
+    })
+    .state(STATE_CANCELED)
+    .in(order -> {
+    // Handle the order is canceled
+    })
+    .state(STATE_RECEIVED)
+    .in(order -> {
+    // Handle the delivery
+    })
+    .initialize("create order", STATE_CREATED)
+    .action("pay order", STATE_CREATED, STATE_PAYED)
+    .action("cancel order", STATE_CREATED, STATE_CANCELED)
+    .action("deliver goods", STATE_PAYED, STATE_RECEIVED);
 ```
 
-* Method 1: Customized State Provider
+### Method 1: Customized State Provider
 
-To store states, you have to implement a `StateProvider`, SWState provides a `DefaultStateProvider` which stores states
-in memory, but it is probably not fulfill your situation. Usually, the states you want to manage stores in a column of
-DB tables, so let's do it as example:
+To store states, you need to implement a `StateProvider`, SWState provides a `DefaultStateProvider` which stores states
+in memory, but it is probably not suit your situation. Usually, the states you want to manage are in a column of
+DB tables, so let's implement a database version `StateProvider`.
 
 `MyDatabaseStateProvider.java`
 
@@ -101,7 +110,7 @@ import com.github.swiftech.swstate.StateProvider;
 
 public class MyDatabaseStateProvider implements StateProvider<String> {
   public MyDatabaseStateProvider() {
-      // do some init
+      // do some necessary init
   }
   ... // implement all methods for storing or retrieving state from database.
 }
@@ -113,23 +122,26 @@ Replace the default state provider of state machine with yours:
 stateMachine.setStateProvider(new MyDatabaseStateProvider());
 ```
 
-* Method 2: Use `StateTransition`
+### Method 2: Use `StateTransition`
+
+Instead of `StateMachine`, `StateTransition` is at lower level, it doesn't store current state but only process state transition.
+
+First, construct instance of `StateTransition` just like `StateMachine` does.
 
 ```java
-StateTransition<String, Order> stateTransition = new StateTransition<>();
-stateTransition.build(stateBuilder);
+StateTransition<String, Order> stateTransition = new StateTransition<>(stateBuilder);
 ```
 
-use `stateTransition` to transit states which are load from other storages:
+Second, use `stateTransition` to transit states which are loaded from other storage:
 
 ```java
 public void pay(String id){
     String currentState = repository.getState(id); // repository is your own data access API
-    stateTransition.post(currentState, "Payed"); // if current state is not 'Created', it fails as per previous setting
+    stateTransition.post(currentState, STATE_PAYED); // if current state is not 'Created', it fails as per previous setting
 }
 ```
 
-# Maven
+### Maven
 
 ```xml
 <dependency>

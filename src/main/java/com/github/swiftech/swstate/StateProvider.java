@@ -11,7 +11,7 @@ import java.io.Serializable;
 public interface StateProvider<S extends Serializable> {
 
     /**
-     * Get Current state
+     * Get current state
      *
      * @return
      */
