@@ -7,6 +7,9 @@
     <groupId>com.github.swiftech</groupId>
     <artifactId>swstate</artifactId>
     <version>1.0</version>
+    <name>SWState</name>
+    <description>A really simple but useful state machine implementation based on Java 8 with zero dependencies.</description>
+    <url>https://github.com/swiftech/SWState</url>
 
     <properties>
         <java.version>1.8</java.version>
