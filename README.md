@@ -11,25 +11,32 @@ Assume that we have a turnstile with 2 states `Locked`, `Unlocked` and 2 actions
 ### Build the `StateMachine`
   
   Before using `StateMachine` you must set it up by defining Actions and Process with `StateBuilder`:
-  
+
+defined states：
+
+```java
+final String STATE_LOCKED = "Locked";
+final String STATE_UNLOCKED = "Unlocked";
+```  
+
 ```java
 StateBuilder<String, Serializable> stateBuilder = new StateBuilder<>();
 stateBuilder
-        .state("Locked")
+        .state(STATE_LOCKED)
         .in(order -> {
             // Handle before the turnstile is locked.
             System.out.println("turnstile is locked");
         })
-        .state("Unlocked")
+        .state(STATE_UNLOCKED)
         .in(order -> {
             // Handle before the turnstile is unlocked.
             System.out.println("turnstile is unlocked");
         })
-        .initialize("Locked")
-        .action("coin_locked", "Locked", "Unlocked")
-        .action("push_unlocked", "Unlocked", "Locked")
-        .action("coin_unlocked", "Unlocked", "Unlocked")
-        .action("push_unlocked", "Locked", "Locked");
+        .initialize(STATE_LOCKED)
+        .action("coin_locked", STATE_LOCKED, STATE_UNLOCKED)
+        .action("push_unlocked", STATE_UNLOCKED, STATE_LOCKED)
+        .action("coin_unlocked", STATE_UNLOCKED, STATE_UNLOCKED)
+        .action("push_unlocked", STATE_LOCKED, STATE_LOCKED);
 StateMachine<String, Serializable> stateMachine = new StateMachine<>(stateBuilder);
 ```
 
@@ -40,18 +47,18 @@ the method `in()` bind your actual processing code block
 ### Use `StateMachine` to transit states as per previous definitions. 
 
 ```java
-String id = "turnstile";
+String id = "turnstile0-1";
 stateMachine.start(id);
 ...
-stateMachine.post(id, "Unlocked");
+stateMachine.post(id, STATE_UNLOCKED);
 ...
-stateMachine.post(id, "Locked");
+stateMachine.post(id, STATE_LOCKED);
 ```
 
 > The parameter `id` of `start()` or `post()` identifies  
 
 
-# Advantage
+# Advanced
 
 The `StateMachine` stores states in memory by default, if you want to store states into other storage like database or nosql,
 there are 2 ways to get this done, implement a `StateProvide` or use `StateTransition` directly.
