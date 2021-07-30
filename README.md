@@ -1,23 +1,25 @@
 # SWState
 
-A really simple but useful state machine implementation based on Java 8 with zero dependencies.
+A really easy to use but powerful State Machine implementation based on Java 8 with zero dependencies.
 
 # Usage
 
-Assume that we have a turnstile with 2 states `Locked`, `Unlocked` and 2 actions `Coin`, `Push`, just like the diagram shows:
+Assume that we have a turnstile with 2 states `Locked`, `Unlocked` and 2 actions `Coin`, `Push`, as the diagram shows:
 
 ![](docs/state_machine1.png)
 
+The main class that you use SWState is `StateMachine`, before using that, you should build it by class `StateBuilder`.
+
 ### Build the `StateMachine`
   
-  Before using `StateMachine` you must set it up by defining Actions and Process with `StateBuilder`:
-
 defined states：
 
 ```java
 final String STATE_LOCKED = "Locked";
 final String STATE_UNLOCKED = "Unlocked";
 ```  
+
+Use `StateBuilder` to define Actions and Processes:
 
 ```java
 StateBuilder<String, Serializable> stateBuilder = new StateBuilder<>();
@@ -55,16 +57,16 @@ stateMachine.post(id, STATE_UNLOCKED);
 stateMachine.post(id, STATE_LOCKED);
 ```
 
-> The parameter `id` of `start()` or `post()` identifies  
+> The parameter `id` of `start()` or `post()` identifies the object that using this state machine, which means different ids have their own state.
 
 
 # Advanced
 
-The `StateMachine` stores states in memory by default, if you want to store states into other storage like database or nosql,
+The `StateMachine` stores states in memory by default, if you want to store states into other storages like database or nosql,
 there are 2 ways to get this done, implement a `StateProvide` or use `StateTransition` directly.
 
 Example:
-Assume that we have a simplified online shopping order processing with some order states, just like the diagram shows:
+Assume that we have a simplified online shopping order processing with some order states, as the diagram shows:
 
 ![](docs/state_machine2.png)
 
