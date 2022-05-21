@@ -59,6 +59,15 @@ public class Mapping<S extends Serializable, P extends Serializable> {
     }
 
     /**
+     * Get how many states are mapped with processes.
+     *
+     * @return
+     */
+    public int getSize() {
+        return stateMap.containsKey(null) ? stateMap.size() - 1 : stateMap.size();
+    }
+
+    /**
      * Mapping state direction(IN or OUT) and processes
      */
     public static class SubMapping<P extends Serializable> {

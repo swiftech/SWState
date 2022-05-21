@@ -12,19 +12,31 @@ class StateTransitionTest {
     public void testSimple() {
         StateBuilder<String, String> stateBuilder = new StateBuilder<>();
         stateBuilder.initialize("first")
-                .action("", "first", "second");
+                .action("f-s", "first", "second");
         stateBuilder.state("first").in(payload -> {
             System.out.println("First");
         }).state("second").in(payload -> {
             System.out.println("Second");
         });
         //
-        System.out.println(stateBuilder.hasRoute(null, "first"));
+        Assertions.assertTrue(stateBuilder.hasRoute(null, "first"));
         StateTransition<String, String> transition = new StateTransition<>(stateBuilder);
         transition.start();
-        System.out.println(stateBuilder.hasRoute("first", "second"));
+        Assertions.assertTrue(stateBuilder.hasRoute("first", "second"));
         transition.post("first", "second");
         Assertions.assertThrows(Exception.class, () -> transition.post("second", "first"));
+    }
+
+    @Test
+    public void testSelf() {
+        StateBuilder<String, String> stateBuilder = new StateBuilder<>();
+        stateBuilder.state("first").in(payload -> {
+            System.out.println("first");
+        });
+        stateBuilder.initialize("first")
+                .action("self", "first");
+        StateTransition<String, String> transition = new StateTransition<>(stateBuilder);
+        transition.post("first", "first");
     }
 
     @Test

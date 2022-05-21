@@ -7,9 +7,10 @@ import java.io.Serializable;
 
 /**
  * {@link StateMachine} is different from {@link StateTransition}, the state is persisted by {@link StateProvider}.
- * It must starts from the initial state, which was specified by methods {@code initialize()} of {@link StateBuilder},
+ * It must start from the initial state, which was specified by methods {@code initialize()} of {@link StateBuilder},
  * and transit states exactly as the rules built by {@link StateBuilder}. Multiple state cycles is supported by
- * giving an {@code id} to methods to differentiate them .
+ * giving a parameter {@code id} to methods to differentiate them, for only one cycle circumstance,
+ * call methods without parameter {@code id}.
  * <p>
  * Usage:
  * <pre>
@@ -31,12 +32,15 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
 
     private StateProvider<S> stateProvider;
 
+    private final String DEFAULT_ID = "DEFAULT_ID";
+
     /**
      * Construct state machine with state builder and default state provider.
      */
     public StateMachine(StateBuilder<S, P> stateBuilder) {
         this.stateTransition = new StateTransition<>(stateBuilder);
         this.stateProvider = new DefaultStateProvider<>();
+        this.printInfo(stateBuilder);
     }
 
     /**
@@ -47,6 +51,11 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     public StateMachine(StateBuilder<S, P> stateBuilder, StateProvider<S> stateProvider) {
         this.stateTransition = new StateTransition<>(stateBuilder);
         this.stateProvider = stateProvider;
+        this.printInfo(stateBuilder);
+    }
+
+    private void printInfo(StateBuilder<S, P> stateBuilder) {
+        log.debug(stateBuilder.getMetaInfo());
     }
 
     /**
@@ -59,7 +68,17 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     }
 
     /**
-     * Check whether current state is provided state.
+     * Check whether state for default id is provided state.
+     *
+     * @param state
+     * @return
+     */
+    public boolean isState(S state) {
+        return this.isState(DEFAULT_ID, state);
+    }
+
+    /**
+     * Check whether state for {@code id} is provided state.
      *
      * @param id
      * @param state
@@ -70,13 +89,32 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     }
 
     /**
-     * Check current state is in listed states.
+     * Check state for default id is in listed states.
      *
      * @param states
      * @return
      */
-    public boolean isStateIn(String id, S... states) {
+    public boolean isStateIn(S... states) {
+        return stateProvider.isStateIn(DEFAULT_ID, states);
+    }
+
+    /**
+     * Check state for {@code id} is in listed states.
+     *
+     * @param states
+     * @return
+     */
+    public boolean isStateOfIdIn(String id, S... states) {
         return stateProvider.isStateIn(id, states);
+    }
+
+    /**
+     * Get Current state for default id.
+     *
+     * @return
+     */
+    public S getCurrentState() {
+        return getCurrentState(DEFAULT_ID);
     }
 
     /**
@@ -90,7 +128,16 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     }
 
     /**
-     * Reset state no matter what current state is.
+     * Reset state no matter what state for default id is.
+     *
+     * @param state
+     */
+    public void resetState(S state) {
+        this.resetState(DEFAULT_ID, state);
+    }
+
+    /**
+     * Reset state no matter what state for {@code id} is.
      *
      * @param id
      * @param state
@@ -100,7 +147,14 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     }
 
     /**
-     * Start a new circulation from initial state.
+     * Start a new circulation from initial state for default id.
+     */
+    public void start() {
+        this.start(DEFAULT_ID);
+    }
+
+    /**
+     * Start a new circulation from initial state for {@code id}.
      *
      * @param id
      */
@@ -109,7 +163,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     }
 
     /**
-     * Start a new circulation from initial state.
+     * Start a new circulation from initial state for {@code id}.
      *
      * @param id
      * @param payload
@@ -117,62 +171,100 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     public void start(String id, P payload) {
         S currentState = this.getCurrentState(id);
         if (currentState != null) {
-            throw new RuntimeException(String.format("State machine for id '%s' is already started.", id));
+            throw new StateException(String.format("State machine for id '%s' is already started.", id));
         }
         S initialState = stateTransition.start(payload);
         stateProvider.initializeState(id, initialState);
     }
 
     /**
-     * Start a new circulation from specified initial state.
+     * Start a new circulation from specified initial state for default id.
+     *
+     * @param initialState
+     */
+    public void startState(S initialState) {
+        this.startState(DEFAULT_ID, initialState);
+    }
+
+    /**
+     * Start a new circulation from specified initial state with payload for default id.
+     *
+     * @param initialState
+     * @param payload
+     */
+    public void startStateWithPayload(S initialState, P payload) {
+        this.startStateWithPayload(DEFAULT_ID, initialState, payload);
+    }
+
+    /**
+     * Start a new circulation from specified initial state for {@code id}.
      *
      * @param id
      * @param initialState
      */
     public void startState(String id, S initialState) {
-        this.startState(id, initialState, null);
+        this.startStateWithPayload(id, initialState, null);
     }
 
     /**
-     * Start a new circulation from specified initial state with payload.
+     * Start a new circulation from specified initial state with payload for {@code id}.
      *
      * @param id
      * @param initialState
      * @param payload
      */
-    public void startState(String id, S initialState, P payload) {
+    public void startStateWithPayload(String id, S initialState, P payload) {
         S currentState = this.getCurrentState(id);
         if (currentState != null) {
-            throw new RuntimeException(String.format("State machine for id '%s' is already started.", id));
+            throw new StateException(String.format("State machine for id '%s' is already started.", id));
         }
         stateTransition.startState(initialState, payload);
         stateProvider.initializeState(id, initialState);
     }
 
     /**
-     * Post current state to provided state without any payload.
+     * Post current state to provided state without any payload for default id.
+     *
+     * @param toState
+     */
+    public void post(S toState) {
+        this.post(DEFAULT_ID, toState);
+    }
+
+    /**
+     * Post current state to provided state with payload for default id.
+     *
+     * @param toState
+     * @param payload
+     */
+    public void postWithPayload(S toState, P payload) {
+        this.postWithPayload(DEFAULT_ID, toState, payload);
+    }
+
+    /**
+     * Post current state to provided state without any payload for {@code id}.
      *
      * @param id
      * @param toState
      * @return
      */
     public void post(String id, S toState) {
-        this.post(id, toState, null);
+        this.postWithPayload(id, toState, null);
     }
 
     /**
-     * Post current state to provided state with payload.
+     * Post current state to provided state with payload for {@code id}.
      *
      * @param id
      * @param toState
      * @param payload
      * @return
      */
-    public void post(String id, S toState, P payload) {
+    public void postWithPayload(String id, S toState, P payload) {
         S currentState = this.getCurrentState(id);
         log.trace(String.format("Current state for '%s' is '%s'", id, currentState));
         if (currentState == null) {
-            throw new RuntimeException(String.format("State machine for '%s' is not started.", id));
+            throw new StateException(String.format("State machine for '%s' is not started.", id));
         }
         stateTransition.post(currentState, toState, payload);
         stateProvider.setState(id, toState);

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.github.swiftech.swstate.Mapping.*;
+import static com.github.swiftech.swstate.Mapping.StateDirection;
 
 /**
  * Builds states with actions and transition processing.
@@ -18,6 +18,7 @@ import static com.github.swiftech.swstate.Mapping.*;
 public class StateBuilder<S extends Serializable, P extends Serializable> {
 
     // state from -> state to -> action
+    // set state from to null means initial state.
     final Map<S, Map<S, Action<S>>> actionMap = new HashMap<>();
 
     // mapping for states and transition processing.
@@ -39,7 +40,7 @@ public class StateBuilder<S extends Serializable, P extends Serializable> {
     /**
      * Add an action with name to the initial state.
      *
-     * @param name
+     * @param name         name of the action
      * @param initialState
      * @return
      */
@@ -51,7 +52,7 @@ public class StateBuilder<S extends Serializable, P extends Serializable> {
     /**
      * Add an action from one state to another.
      *
-     * @param name
+     * @param name      name of the action
      * @param stateFrom the state before the action happens.
      * @param stateTo   the state after the action happens.
      * @return
@@ -64,10 +65,14 @@ public class StateBuilder<S extends Serializable, P extends Serializable> {
         return this;
     }
 
+    public StateBuilder<S, P> action(String name, S state) {
+        return action(name, state, state);
+    }
+
     /**
      * Add an action from one state to another and with same name in reverse.
      *
-     * @param name
+     * @param name name of the action
      * @param s1
      * @param s2
      * @return
@@ -132,5 +137,34 @@ public class StateBuilder<S extends Serializable, P extends Serializable> {
         return this;
     }
 
+    public String getMetaInfo() {
+        String template = "State Machine info:\n" +
+                "- %d states defined in total and %d state has process.\n" +
+                "%s";
+        int statesCount = actionMap.containsKey(null) ? actionMap.size() - 1 : actionMap.size();
+        StringBuilder buf = new StringBuilder();
+        Map<S, Integer> toCount = new HashMap<>();
+        for (S from : actionMap.keySet()) {
+            Map<S, Action<S>> toMap = actionMap.get(from);
+            buf.append("- State ").append(from == null ? "default" : from.toString())
+                    .append(" has ").append(toMap.size()).append(" outbounds.\n");
+            // count 'to'
+            for (S to : toMap.keySet()) {
+                Integer count = toCount.getOrDefault(to, 0);
+                toCount.put(to, ++count);
+                // count using which only has inbounds
+                if (!actionMap.containsKey(to)) {
+                    statesCount++;
+                }
+            }
+
+        }
+        for (S to : toCount.keySet()) {
+            buf.append("- State ").append(to)
+                    .append(" has ").append(toCount.get(to)).append(" inbounds.\n");
+        }
+
+        return String.format(template, statesCount, stateMapping.getSize(), buf);
+    }
 
 }

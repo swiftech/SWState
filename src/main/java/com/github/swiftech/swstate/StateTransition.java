@@ -54,10 +54,10 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
     public S start(P payload) {
         Map<S, Action<S>> actionMap = this.actionMap.get(null);
         if (actionMap == null || actionMap.isEmpty()) {
-            throw new RuntimeException("StateTransition is not properly built, no initial actions.");
+            throw new StateException("StateTransition is not properly built, no initial actions.");
         }
         if (actionMap.size() > 1) {
-            throw new RuntimeException("More than one initial state, use startState() instead.");
+            throw new StateException("More than one initial state, use startState() instead.");
         }
         Optional<Action<S>> optAction = actionMap.values().stream().findFirst();
         S stateTo = optAction.get().getStateTo();
@@ -109,7 +109,8 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
      * @return
      */
     public void post(final S from, final S to, P payload) {
-        log.debug(String.format("Try to change state from '%s' to '%s' with payload", from, to));
+        Action<S> action = this.actionMap.get(from).get(to);
+        log.debug(String.format("Try to change state from '%s' to '%s' with payload for action '%s'", from, to, action.getName()));
         this.doPost(from, to, payload);
     }
 
@@ -134,7 +135,7 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
             }
             else {
                 log.debug(String.format("Execute %d actions for exiting state '%s' ", outProcesses.size(), from));
-                exeActions(outProcesses, payload);
+                execProcesses(outProcesses, payload);
             }
         }
 
@@ -145,11 +146,11 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
         }
         else {
             log.debug(String.format("Execute %d actions for entering state '%s' ", inProcesses.size(), to));
-            exeActions(inProcesses, payload);
+            execProcesses(inProcesses, payload);
         }
     }
 
-    private void exeActions(List<Process<P>> processes, P payload) {
+    private void execProcesses(List<Process<P>> processes, P payload) {
         // All mapped processes for one state
         for (Process<P> process : processes) {
 

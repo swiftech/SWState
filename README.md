@@ -2,7 +2,7 @@
 
 A really easy to use but powerful State Machine implementation based on Java 8 with zero dependencies.
 
-# Usage
+## Usage
 
 Assume that we have a turnstile with 2 states `Locked`, `Unlocked` and 2 actions `Coin`, `Push`, as the diagram shows:
 
@@ -60,7 +60,7 @@ stateMachine.post(id, STATE_LOCKED);
 > The parameter `id` of `start()` or `post()` identifies the object that using this state machine, which means different ids have their own state.
 
 
-# Advanced
+## Advanced
 
 The `StateMachine` stores states in memory by default, if you want to store states into other storages like database or nosql,
 there are 2 ways to get this done, implement a `StateProvide` or use `StateTransition` directly.
@@ -156,6 +156,6 @@ public void pay(String id){
 <dependency>
     <groupId>com.github.swiftech</groupId>
     <artifactId>swstate</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
 </dependency>
 ```

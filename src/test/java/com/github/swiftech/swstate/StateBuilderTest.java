@@ -1,5 +1,6 @@
 package com.github.swiftech.swstate;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -18,13 +19,16 @@ public class StateBuilderTest {
         stateBuilder.action("action a", s1, s2);
         stateBuilder.action("action b", s1, s3);
         stateBuilder.action("action c", s3, s4);
+        stateBuilder.action("action a", s2);
         // True
-        System.out.println(stateBuilder.hasRoute(s1, s2));
-        System.out.println(stateBuilder.hasRoute(s1, s3));
-        System.out.println(stateBuilder.hasRoute(s3, s4));
+        Assertions.assertTrue(stateBuilder.hasRoute(s1, s2));
+        Assertions.assertTrue(stateBuilder.hasRoute(s1, s3));
+        Assertions.assertTrue(stateBuilder.hasRoute(s3, s4));
+        Assertions.assertTrue(stateBuilder.hasRoute(s2, s2));
         // False
-        System.out.println(stateBuilder.hasRoute(s3, s2));
-        System.out.println(stateBuilder.hasRoute(s3, s5));
+        Assertions.assertFalse(stateBuilder.hasRoute(s1, s1));
+        Assertions.assertFalse(stateBuilder.hasRoute(s3, s2));
+        Assertions.assertFalse(stateBuilder.hasRoute(s3, s5));
     }
 
     @Test
