@@ -152,6 +152,18 @@ public void pay(String id){
 
 ### Maven
 
+* Stable version
+
+```xml
+<dependency>
+    <groupId>com.github.swiftech</groupId>
+    <artifactId>swstate</artifactId>
+    <version>1.1</version>
+</dependency>
+```
+
+* Unstable version
+
 ```xml
 <dependency>
     <groupId>com.github.swiftech</groupId>
