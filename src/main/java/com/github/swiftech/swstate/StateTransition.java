@@ -110,7 +110,7 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
      */
     public void post(final S from, final S to, P payload) {
         Action<S> action = this.actionMap.get(from).get(to);
-        log.debug(String.format("Try to change state from '%s' to '%s' with payload for action '%s'", from, to, action.getName()));
+        log.debug(String.format("Try to change state from '%s' to '%s' with payload for action '%s'", from, to, action == null ? "null" : action.getName()));
         this.doPost(from, to, payload);
     }
 
