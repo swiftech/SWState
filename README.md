@@ -58,6 +58,18 @@ stateMachine.post(id, STATE_LOCKED);
 ```
 
 > The parameter `id` of `start()` or `post()` identifies the object that using this state machine, which means different ids have their own state.
+> If states change with payload, call `postWithPayload` methods with payload, like `postWithPayload(id, payload)`.
+
+
+If no ID be used to identify object, just call methods without ID:
+
+```java
+stateMachine.start();
+...
+stateMachine.post(STATE_UNLOCKED);
+...
+stateMachine.post(STATE_LOCKED);
+```
 
 
 ## Advanced
@@ -158,7 +170,7 @@ public void pay(String id){
 <dependency>
     <groupId>com.github.swiftech</groupId>
     <artifactId>swstate</artifactId>
-    <version>1.1</version>
+    <version>1.0</version>
 </dependency>
 ```
 
