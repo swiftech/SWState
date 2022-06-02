@@ -163,6 +163,15 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     }
 
     /**
+     * Start a new circulation from initial state for default id.
+     *
+     * @param payload
+     */
+    public void startWithPayload(P payload) {
+        this.start(DEFAULT_ID, payload);
+    }
+
+    /**
      * Start a new circulation from initial state for {@code id}.
      *
      * @param id
