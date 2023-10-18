@@ -1,9 +1,11 @@
 package com.github.swiftech.swstate;
 
+import com.github.swiftech.swstate.trigger.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * {@link StateMachine} is different from {@link StateTransition}, the state is persisted by {@link StateProvider}.
@@ -32,6 +34,8 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
 
     private StateProvider<S> stateProvider;
 
+    private final Map<S, Map<Trigger, S>> triggerMap;
+
     private final String DEFAULT_ID = "DEFAULT_ID";
 
     /**
@@ -39,17 +43,19 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      */
     public StateMachine(StateBuilder<S, P> stateBuilder) {
         this.stateTransition = new StateTransition<>(stateBuilder);
+        this.triggerMap = stateBuilder.triggerMap;
         this.stateProvider = new DefaultStateProvider<>();
         this.printInfo(stateBuilder);
     }
 
     /**
-     * Construct state machine with state builder and  customized state provider.
+     * Construct state machine with state builder and customized state provider.
      *
      * @param stateProvider
      */
     public StateMachine(StateBuilder<S, P> stateBuilder, StateProvider<S> stateProvider) {
         this.stateTransition = new StateTransition<>(stateBuilder);
+        this.triggerMap = stateBuilder.triggerMap;
         this.stateProvider = stateProvider;
         this.printInfo(stateBuilder);
     }
@@ -277,6 +283,59 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
         }
         stateTransition.post(currentState, toState, payload);
         stateProvider.setState(id, toState);
+    }
+
+    /**
+     * Accept data from client to trigger state transition.
+     *
+     * @param data
+     * @since 2.0
+     */
+    public void accept(Object data) {
+        this.accept(DEFAULT_ID, data);
+    }
+
+    /**
+     * Accept data from client to trigger state transition.
+     *
+     * @param id
+     * @param data
+     * @since 2.0
+     */
+    public void accept(String id, Object data) {
+        this.acceptWithPayload(id, data, null);
+    }
+
+    /**
+     * Accept data from client to trigger state transition with payload.
+     *
+     * @param data
+     * @param payload
+     * @since 2.0
+     */
+    public void acceptWithPayload(Object data, P payload) {
+        this.acceptWithPayload(DEFAULT_ID, data, payload);
+    }
+
+    /**
+     * Accept data from client to trigger state transition with payload.
+     *
+     * @param id
+     * @param data
+     * @param payload
+     * @since 2.0
+     */
+    public void acceptWithPayload(String id, Object data, P payload) {
+        Map<Trigger, S> toByTriggerMap = triggerMap.get(this.getCurrentState());
+        for (Trigger trigger : toByTriggerMap.keySet()) {
+            if (trigger.accept(data, payload)) {
+                log.debug("Accept '%s' with payload '%s'".formatted(data, Utils.payloadSummary(payload)));
+                S stateTo = toByTriggerMap.get(trigger);
+                // transit to next state
+                this.postWithPayload(id, stateTo, payload);
+                return;
+            }
+        }
     }
 
 }

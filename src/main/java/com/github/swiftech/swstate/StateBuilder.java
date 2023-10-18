@@ -1,7 +1,11 @@
 package com.github.swiftech.swstate;
 
+import com.github.swiftech.swstate.trigger.Trigger;
+import com.github.swiftech.swstate.trigger.TriggerBuilder;
+
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,10 +25,22 @@ public class StateBuilder<S extends Serializable, P extends Serializable> {
     // set state from to null means initial state.
     final Map<S, Map<S, Action<S>>> actionMap = new HashMap<>();
 
+    final Map<S, Map<Trigger, S>> triggerMap = new HashMap<>();
+
     // mapping for states and transition processing.
     final Mapping<S, P> stateMapping = new Mapping<>();
 
     private S composeState;
+
+    /**
+     * Start to build triggers for one action.
+     *
+     * @return
+     * @since 2.0
+     */
+    public TriggerBuilder triggerBuilder() {
+        return new TriggerBuilder();
+    }
 
     /**
      * Add an action to the initial state.
@@ -65,12 +81,57 @@ public class StateBuilder<S extends Serializable, P extends Serializable> {
         return this;
     }
 
+    /**
+     * Add an action from one state to another.
+     *
+     * @param name      name of the action
+     * @param stateFrom the state before the action happens.
+     * @param stateTo   the state after the action happens.
+     * @param triggers  triggers to automatically transit the state.
+     * @return
+     * @since 2.0
+     */
+    public StateBuilder<S, P> action(String name, S stateFrom, S stateTo, Trigger... triggers) {
+        if (!hasRoute(stateFrom, stateTo)) {
+            Map<S, Action<S>> toMap = actionMap.computeIfAbsent(stateFrom, k -> new HashMap<>());
+            toMap.put(stateTo, new Action<>(name, stateFrom, stateTo));
+
+            if (triggers != null && triggers.length > 0) {
+                Map<Trigger, S> toByTriggerMap = triggerMap.computeIfAbsent(stateFrom, k -> new LinkedHashMap<>());
+                for (Trigger trigger : triggers) {
+                    toByTriggerMap.put(trigger, stateTo);
+                }
+            }
+        }
+        return this;
+    }
+
+
+    /**
+     * Add an action that loop the state itself.
+     *
+     * @param name name of the action
+     * @param state
+     * @return
+     */
     public StateBuilder<S, P> action(String name, S state) {
         return action(name, state, state);
     }
 
     /**
-     * Add an action from one state to another and with same name in reverse.
+     *
+     * @param name name of the action
+     * @param state
+     * @param triggers  triggers to automatically transit the state.
+     * @return
+     * @since 2.0
+     */
+    public StateBuilder<S, P> action(String name, S state, Trigger... triggers) {
+        return action(name, state, state, triggers);
+    }
+
+    /**
+     * Add an action of from one state to another and with the same name in reverse.
      *
      * @param name name of the action
      * @param s1
@@ -80,6 +141,24 @@ public class StateBuilder<S extends Serializable, P extends Serializable> {
     public StateBuilder<S, P> actionBidirectional(String name, S s1, S s2) {
         action(name, s1, s2);
         action(name, s2, s1);
+        return this;
+    }
+
+    /**
+     * Add an action of from one state to another and with the same name in reverse.
+     * The 2 actions are sharing triggers, which means both of the states are affected by the given triggers.
+     * If you don't want that, define the 2 actions separately with different triggers.
+     *
+     * @param name name of the action
+     * @param s1
+     * @param s2
+     * @param triggers  triggers to automatically transit the state.
+     * @return
+     * @since 2.0
+     */
+    public StateBuilder<S, P> actionBidirectional(String name, S s1, S s2, Trigger... triggers) {
+        action(name, s1, s2, triggers);
+        action(name, s2, s1, triggers);
         return this;
     }
 
@@ -138,9 +217,10 @@ public class StateBuilder<S extends Serializable, P extends Serializable> {
     }
 
     public String getMetaInfo() {
-        String template = "State Machine info:\n" +
-                "- %d states defined in total and %d state has process.\n" +
-                "%s";
+        String template = """
+                State Machine info:
+                - %d states defined in total and %d state has process.
+                %s""";
         int statesCount = actionMap.containsKey(null) ? actionMap.size() - 1 : actionMap.size();
         StringBuilder buf = new StringBuilder();
         Map<S, Integer> toCount = new HashMap<>();

@@ -1,6 +1,6 @@
 # SWState
 
-A really easy to use but powerful State Machine implementation based on Java 8 with zero dependencies.
+A really easy to use but useful State Machine implementation with zero dependencies.
 
 ## Usage
 
