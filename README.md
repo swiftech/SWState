@@ -61,7 +61,7 @@ stateMachine.post(id, STATE_LOCKED);
 > If states change with payload, call `postWithPayload` methods with payload, like `postWithPayload(id, payload)`.
 
 
-If no ID be used to identify object, just call methods without ID:
+If no ID is used to identify object, just call methods without ID:
 
 ```java
 stateMachine.start();

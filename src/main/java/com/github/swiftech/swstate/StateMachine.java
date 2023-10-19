@@ -289,10 +289,11 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      * Accept data from client to trigger state transition.
      *
      * @param data
+     * @return
      * @since 2.0
      */
-    public void accept(Object data) {
-        this.accept(DEFAULT_ID, data);
+    public boolean accept(Object data) {
+        return this.accept(DEFAULT_ID, data);
     }
 
     /**
@@ -300,10 +301,11 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      *
      * @param id
      * @param data
+     * @return
      * @since 2.0
      */
-    public void accept(String id, Object data) {
-        this.acceptWithPayload(id, data, null);
+    public boolean accept(String id, Object data) {
+        return this.acceptWithPayload(id, data, null);
     }
 
     /**
@@ -311,10 +313,11 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      *
      * @param data
      * @param payload
+     * @return
      * @since 2.0
      */
-    public void acceptWithPayload(Object data, P payload) {
-        this.acceptWithPayload(DEFAULT_ID, data, payload);
+    public boolean acceptWithPayload(Object data, P payload) {
+        return this.acceptWithPayload(DEFAULT_ID, data, payload);
     }
 
     /**
@@ -323,9 +326,10 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      * @param id
      * @param data
      * @param payload
+     * @return
      * @since 2.0
      */
-    public void acceptWithPayload(String id, Object data, P payload) {
+    public boolean acceptWithPayload(String id, Object data, P payload) {
         Map<Trigger, S> toByTriggerMap = triggerMap.get(this.getCurrentState());
         for (Trigger trigger : toByTriggerMap.keySet()) {
             if (trigger.accept(data, payload)) {
@@ -333,9 +337,10 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
                 S stateTo = toByTriggerMap.get(trigger);
                 // transit to next state
                 this.postWithPayload(id, stateTo, payload);
-                return;
+                return true;
             }
         }
+        return false;
     }
 
 }

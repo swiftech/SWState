@@ -18,9 +18,7 @@ public class TriggerBuilder {
     }
 
     public TriggerBuilder c(Character... characters) {
-        for (Character character : characters) {
-            triggers.add(new CharTrigger(character));
-        }
+        triggers.addAll(Arrays.stream(characters).map(CharTrigger::new).toList());
         return this;
     }
 
