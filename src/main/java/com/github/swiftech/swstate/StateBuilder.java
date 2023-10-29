@@ -18,6 +18,7 @@ import static com.github.swiftech.swstate.Mapping.StateDirection;
  * @param <P> type of Payload
  * @author swiftech
  * @see StateTransition
+ * @see TriggerBuilder
  */
 public class StateBuilder<S extends Serializable, P extends Serializable> {
 

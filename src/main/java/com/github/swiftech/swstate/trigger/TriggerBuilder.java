@@ -5,8 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Builder to build trigger for StateBuilder.
+ *
  * @author swiftech
  * @since 2.0
+ * @see com.github.swiftech.swstate.StateBuilder
  */
 public class TriggerBuilder {
 
