@@ -289,7 +289,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      * Accept data from client to trigger state transition.
      *
      * @param data
-     * @return
+     * @return true if data is accepted.
      * @since 2.0
      */
     public boolean accept(Object data) {
@@ -301,7 +301,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      *
      * @param id
      * @param data
-     * @return
+     * @return true if data is accepted.
      * @since 2.0
      */
     public boolean accept(String id, Object data) {
@@ -313,7 +313,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      *
      * @param data
      * @param payload
-     * @return
+     * @return true if data is accepted.
      * @since 2.0
      */
     public boolean acceptWithPayload(Object data, P payload) {
@@ -326,7 +326,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      * @param id
      * @param data
      * @param payload
-     * @return
+     * @return true if data is accepted.
      * @since 2.0
      */
     public boolean acceptWithPayload(String id, Object data, P payload) {

@@ -52,6 +52,26 @@ public class TriggerBuilder {
         return this;
     }
 
+    public TriggerBuilder f(Float f) {
+        triggers.add(new FloatTrigger(f));
+        return this;
+    }
+
+    public TriggerBuilder f(Float... fs) {
+        triggers.addAll(Arrays.stream(fs).map(FloatTrigger::new).toList());
+        return this;
+    }
+
+    public TriggerBuilder d(Double d) {
+        triggers.add(new DoubleTrigger(d));
+        return this;
+    }
+
+    public TriggerBuilder d(Double... ds) {
+        triggers.addAll(Arrays.stream(ds).map(DoubleTrigger::new).toList());
+        return this;
+    }
+
     public TriggerBuilder custom(Trigger trigger) {
         triggers.add(trigger);
         return this;

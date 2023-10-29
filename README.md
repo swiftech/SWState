@@ -71,6 +71,37 @@ stateMachine.post(STATE_UNLOCKED);
 stateMachine.post(STATE_LOCKED);
 ```
 
+### Trigger
+As of version 2.0, Trigger is introduced to provides automatically state transition. 
+Assume that the states transitions are determined just by some input, with trigger, you don't need to write the logic code by your own, it can be done automatically.
+
+for example, by defining specific input to trigger the state transition:
+
+* first of all, define the actions like this:
+```java
+stateBuilder
+        ...
+        .action("coin_locked", STATE_LOCKED, STATE_UNLOCKED, stateBuilder.triggerBuilder().c('a', 'A').build())
+        .action("push_unlocked", STATE_UNLOCKED, STATE_LOCKED, stateBuilder.triggerBuilder().i(1).build())
+        .action("coin_unlocked", STATE_UNLOCKED, STATE_UNLOCKED, stateBuilder.triggerBuilder().f(1.0f).build())
+        .action("push_unlocked", STATE_LOCKED, STATE_LOCKED, stateBuilder.triggerBuilder().s("STRING1", "STRING2").build());
+```
+* to activate the states transition automatically, just consume the input using `accept` method of `StateMachine` continuously:
+```java
+    stateMachine.accept('a'); // transit state from STATE_LOCKED to STATE_UNLOCKED
+    stateMachine.accept(1); // transit state from STATE_UNLOCKED to STATE_LOCKED
+    stateMachine.accept("unkown input") // THIS WON'T TRIGGER ANY STATE TRANSITION. 
+```
+
+* of course, custom trigger can be defined to handle specific situation, eg:
+```java
+.action("coin_locked", STATE_LOCKED, STATE_UNLOCKED, stateBuilder.triggerBuilder().c('a', 'A')
+        .custom((data, payload) -> {
+            return payload.content.equals("ALLOWED");
+        )
+        .build())
+```
+> this is equivalent to posting state by `post()` method.
 
 ## Advanced
 
@@ -165,7 +196,7 @@ public void pay(String id){
 ### Maven
 
 * Stable version
-
+> Minimum JDK version is 8
 ```xml
 <dependency>
     <groupId>com.github.swiftech</groupId>
@@ -175,6 +206,7 @@ public void pay(String id){
 ```
 
 * Unstable version
+> Minimum JDK version is 17
 
 ```xml
 <dependency>

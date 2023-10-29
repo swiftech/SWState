@@ -24,15 +24,15 @@ public class BaseStateTest {
     /**
      * create a builder for testing which takes issue state processing.
      *
-     * @return
+     * @return StateBuilder for testing.
      */
     protected StateBuilder<String, String> createTestStateBuilder() {
         StateBuilder<String, String> stateBuilder = new StateBuilder<>();
         stateBuilder.initialize("Create Issue", s1)
-                .action("Fix Issue", s1, s2, stateBuilder.triggerBuilder().c('a', 'A').custom(customTrigger).build())
-                .action("Reopen Issue", s2, s1, stateBuilder.triggerBuilder().c('b', 'B').build())
-                .action("Test Pass", s2, s3, stateBuilder.triggerBuilder().c('c', 'C').build())
-                .action("Reopen Issue", s3, s1, stateBuilder.triggerBuilder().c('d', 'D').build())
+                .action("Fix Issue", s1, s2, stateBuilder.triggerBuilder().c('a', 'A').i(1).custom(customTrigger).build())
+                .action("Reopen Issue", s2, s1, stateBuilder.triggerBuilder().c('b', 'B').i(2).build())
+                .action("Test Pass", s2, s3, stateBuilder.triggerBuilder().c('c', 'C').f(3.0f).build())
+                .action("Reopen Issue", s3, s1, stateBuilder.triggerBuilder().c('d', 'D').d(4.0).build())
                 .action("Close Issue", s3, s4, payloadTrigger)
                 .state(s1)
                 .in((String payload) -> {
