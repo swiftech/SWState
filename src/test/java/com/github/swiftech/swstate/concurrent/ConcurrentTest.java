@@ -2,6 +2,7 @@ package com.github.swiftech.swstate.concurrent;
 
 
 import com.github.swiftech.swstate.StateBuilder;
+import com.github.swiftech.swstate.StateMachine;
 import com.github.swiftech.swstate.StateTransition;
 import org.apache.commons.lang3.RandomUtils;
 
@@ -9,7 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Test concurrent running of state transition.
+ * Test multi-thread for state machine..
+ * TODO need to refactor the test cases.
  *
  * @author swiftech
  */
@@ -29,27 +31,52 @@ public class ConcurrentTest {
 
     private static final Object lock = new Object();
 
-    public void testConcurrent() {
+    private static int counter = 0;
+
+    private StateBuilder<String, String> createTestStateBuilder() {
         StateBuilder<String, String> stateBuilder = new StateBuilder<>();
         stateBuilder.initialize(S1)
-                .action("", S1, S2)
-                .action("", S2, S3)
+//                .action("s1->s2", S1, S2)
+//                .action("s2->s3", S2, S3)
+//                .action("s3->s1", S3, S1)
+//                .action("s3->s2", S3, S2)
+//                .action("s2->s1", S2, S1)
+                .action("S1*", S1, S1)
+                .action("S2*", S2, S2)
+                .action("S3*", S3, S3)
+                .actionBidirectional("s1->s2", S1, S2)
+                .actionBidirectional("s2->s3", S2, S3)
+                .actionBidirectional("s3->s1", S3, S1)
                 .state(S1)
                 .in((payload -> {
-                    System.out.println(payload);
+                    System.out.printf("%d: %s%n", counter++, payload);
                     sleepNoException(RandomUtils.nextInt(START_INCLUSIVE, END_EXCLUSIVE));
                 }))
                 .state(S2)
                 .in(payload -> {
-                    System.out.println(payload);
+                    System.out.printf("%d: %s%n", counter++, payload);
                     sleepNoException(RandomUtils.nextInt(START_INCLUSIVE, END_EXCLUSIVE));
                 })
                 .state(S3)
                 .in(payload -> {
-                    System.out.println(payload);
-                    sleepNoException(RandomUtils.nextInt(START_INCLUSIVE, END_EXCLUSIVE));
+                    synchronized (lock) {
+                        int c = counter++;
+                        System.out.printf("BEFORE %d: %s%n", c, payload);
+                        sleepNoException(RandomUtils.nextInt(START_INCLUSIVE, END_EXCLUSIVE));
+                        if (c != counter) {
+                            System.out.printf("AFTER %d: %s%n", counter, payload);
+                            throw new IllegalStateException();
+                        }
+                    }
                 });
+        return stateBuilder;
+    }
 
+    /**
+     * Just test if it has no exceptions in concurrent scenario.
+     */
+    public void testTransition() {
+        StateBuilder<String, String> stateBuilder = this.createTestStateBuilder();
         StateTransition<String, String> transition = new StateTransition<>(stateBuilder);
         for (int i = 0; i < 100; i++) {
             Thread t = new Thread(() -> {
@@ -75,7 +102,26 @@ public class ConcurrentTest {
 //			e.printStackTrace();
 //		}
         sleepNoException(600 * 1000);
+    }
 
+    /**
+     *
+     */
+    public void testStateMachine() {
+        StateBuilder<String, String> stateBuilder = this.createTestStateBuilder();
+        StateMachine<String, String> stateMachine = new StateMachine<>(stateBuilder);
+        stateMachine.start();
+        for (int i = 0; i < 100; i++) {
+            Thread t = new Thread(() -> {
+                for (int j = 0; j < states.size(); j++) {
+                    String to = states.get(j);
+                    stateMachine.post(to);
+                    sleepNoException(RandomUtils.nextInt(START_INCLUSIVE, END_EXCLUSIVE));
+                }
+            });
+            t.start();
+//            sleepNoException(1000);
+        }
     }
 
     private void sleepNoException(long millis) {
@@ -88,6 +134,7 @@ public class ConcurrentTest {
 
     public static void main(String[] args) {
         ConcurrentTest concurrentTest = new ConcurrentTest();
-        concurrentTest.testConcurrent();
+//        concurrentTest.testTransition();
+        concurrentTest.testStateMachine();
     }
 }
