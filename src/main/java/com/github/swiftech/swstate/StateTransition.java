@@ -72,7 +72,7 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
      * @return
      */
     public void startState(final S state) {
-        log.debug(String.format("Start state at '%s'", state));
+        if (log.isDebugEnabled()) log.debug(String.format("Start state at '%s'", state));
         this.doPost(null, state, null);
     }
 
@@ -84,7 +84,7 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
      * @return
      */
     public void startState(final S state, P payload) {
-        log.debug(String.format("Start state at '%s' with payload", state));
+        if (log.isDebugEnabled()) log.debug(String.format("Start state at '%s' with payload", state));
         this.doPost(null, state, payload);
     }
 
@@ -96,7 +96,7 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
      * @return
      */
     public void post(final S from, final S to) {
-        log.debug(String.format("Try to change state from '%s' to '%s'", from, to));
+        if (log.isDebugEnabled()) log.debug(String.format("Try to change state from '%s' to '%s'", from, to));
         this.doPost(from, to, null);
     }
 
@@ -110,8 +110,9 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
      */
     public void post(final S from, final S to, P payload) {
         Action<S> action = this.actionMap.get(from).get(to);
-        log.debug(String.format("%s: '%s'[%s] -> '%s'", action == null ? "null" : action.getName(),
-                from, Utils.payloadSummary(payload), to));
+        if (log.isDebugEnabled())
+            log.debug(String.format("%s: '%s'[%s] -> '%s'", action == null ? "null" : action.getName(),
+                    from, Utils.payloadSummary(payload), to));
         this.doPost(from, to, payload);
     }
 
@@ -132,10 +133,12 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
         if (from != null) {
             List<Process<P>> outProcesses = stateMapping.getOut(from);
             if (outProcesses == null || outProcesses.isEmpty()) {
-                log.trace(String.format("No actions to execute for exiting state '%s'", from));
+                if (log.isTraceEnabled())
+                    log.trace(String.format("No actions to execute for exiting state '%s'", from));
             }
             else {
-                log.debug(String.format("Execute %d actions for exiting state '%s' ", outProcesses.size(), from));
+                if (log.isDebugEnabled())
+                    log.debug(String.format("Execute %d actions for exiting state '%s' ", outProcesses.size(), from));
                 execProcesses(outProcesses, payload);
             }
         }
@@ -143,10 +146,11 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
         // Handle IN 'to' state
         List<Process<P>> inProcesses = stateMapping.getIn(to);
         if (inProcesses == null || inProcesses.isEmpty()) {
-            log.trace(String.format("No actions to execute for entering state '%s'", to));
+            if (log.isTraceEnabled()) log.trace(String.format("No actions to execute for entering state '%s'", to));
         }
         else {
-            log.debug(String.format("Execute %d actions for entering state '%s' ", inProcesses.size(), to));
+            if (log.isDebugEnabled())
+                log.debug(String.format("Execute %d actions for entering state '%s' ", inProcesses.size(), to));
             execProcesses(inProcesses, payload);
         }
     }
@@ -154,8 +158,7 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
     private void execProcesses(List<Process<P>> processes, P payload) {
         // All mapped processes for one state
         for (Process<P> process : processes) {
-
-            // processes execution, if exception caught, will break the execution process.
+            // processes execution, if exception caught, will break the execution processing.
             try {
                 process.execute(payload);
             } catch (Exception e) {

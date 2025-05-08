@@ -277,7 +277,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      */
     public void postWithPayload(String id, S toState, P payload) {
         S currentState = this.getCurrentState(id);
-        log.trace(String.format("Current state for '%s' is '%s'", id, currentState));
+        if (log.isTraceEnabled()) log.trace(String.format("Current state for '%s' is '%s'", id, currentState));
         if (currentState == null) {
             throw new StateException(String.format("State machine for '%s' is not started.", id));
         }
@@ -333,7 +333,8 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
         Map<Trigger, S> toByTriggerMap = triggerMap.get(this.getCurrentState());
         for (Trigger trigger : toByTriggerMap.keySet()) {
             if (trigger.accept(data, payload)) {
-                log.debug("Accept '%s' with payload '%s'".formatted(data, Utils.payloadSummary(payload)));
+                if (log.isDebugEnabled())
+                    log.debug("Accept '%s' with payload '%s'".formatted(data, Utils.payloadSummary(payload)));
                 S stateTo = toByTriggerMap.get(trigger);
                 // transit to next state
                 this.postWithPayload(id, stateTo, payload);
