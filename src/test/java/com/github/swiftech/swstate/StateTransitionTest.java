@@ -1,12 +1,44 @@
 package com.github.swiftech.swstate;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author swiftech
  */
 class StateTransitionTest {
+
+    @Test
+    public void testException() {
+        StateBuilder<String, String> stateBuilder = new StateBuilder<String, String>()
+                .initialize("A")
+                .state("A")
+                .in(payload -> {
+                    throw new RuntimeException("force exception");
+                })
+                .state("B")
+                .in(payload -> {
+                    throw new RuntimeException("force exception");
+                })
+                .action("a-b", "A", "B")
+                .action("b-a", "B", "A");
+        StateTransition<String, String> stateTransition = new StateTransition<>(stateBuilder);
+
+        // test silent when exception happens.
+        stateTransition.setSilent(false);
+        Assertions.assertThrows(RuntimeException.class, () -> {stateTransition.post("A", "B", "hello");});
+        stateTransition.setSilent(true);
+        Assertions.assertDoesNotThrow(() -> stateTransition.post("B", "A", "hello"));
+
+        // test exception handler
+        stateTransition.setExceptionHandler(stateException -> {
+            System.out.println("exception: " + stateException.getMessage());
+            Assertions.assertNotNull(stateException);
+        });
+        stateTransition.setSilent(true);
+        stateTransition.post("B", "A", "hello");
+    }
 
     @Test
     public void testSimple() {

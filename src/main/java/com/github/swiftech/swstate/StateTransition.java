@@ -11,6 +11,8 @@ import java.util.Optional;
 /**
  * Executes processes when state in or out.
  * all user data will be passed by payload of process.
+ * Call {@code setSilent()} to set whether to throw an exception when an internal exception occurs.
+ * If you want to be notified when an exception occurs despite setting silence, just call {@code setExceptionHandler()} to set an exception callback.
  *
  * @param <S> type of State
  * @param <P> type of Payload
@@ -25,6 +27,12 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
 
     // mapping for states and actions.
     protected Mapping<S, P> stateMapping;
+
+    private ExceptionHandler exceptionHandler;
+
+    // silent if exception in state processes happens.
+    // if false, a {@link StateException} throws.
+    private boolean isSilent = true;
 
     /**
      * Construct state transition with state builder.
@@ -109,7 +117,9 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
      * @return
      */
     public void post(final S from, final S to, P payload) {
-        Action<S> action = this.actionMap.get(from).get(to);
+        Map<S, Action<S>> toMap = this.actionMap.get(from);
+        if (toMap == null) throw new StateException("No state transitions have been defined for state: " + from);
+        Action<S> action = toMap.get(to);
         if (log.isDebugEnabled())
             log.debug(String.format("%s: '%s'[%s] -> '%s'", action == null ? "null" : action.getName(),
                     from, Utils.payloadSummary(payload), to));
@@ -162,8 +172,16 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
             try {
                 process.execute(payload);
             } catch (Exception e) {
-                e.printStackTrace();
-                break; // Prevent all other processes to be executed
+                log.error("Failed to execute process", e);
+                if (exceptionHandler != null) {
+                    exceptionHandler.onException(new StateException("Failed to execute process", e));
+                }
+                if (isSilent) {
+                    break; // Prevent all other processes to be executed
+                }
+                else {
+                    throw new StateException("Failed to execute process", e);
+                }
             }
         }
     }
@@ -185,4 +203,21 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
         return false;
     }
 
+    /**
+     * Handler to be notified when an internal exception occurs.
+     *
+     * @param exceptionHandler
+     */
+    public void setExceptionHandler(ExceptionHandler exceptionHandler) {
+        this.exceptionHandler = exceptionHandler;
+    }
+
+    /**
+     * Set whether throws exception when an internal exception occurs.
+     *
+     * @param silent
+     */
+    public void setSilent(boolean silent) {
+        isSilent = silent;
+    }
 }

@@ -34,7 +34,7 @@ public interface StateProvider<S extends Serializable> {
     void setState(String id, S state);
 
     /**
-     * Check whether current state is provided state.
+     * Check whether the current state is provided state.
      *
      * @param id
      * @param state

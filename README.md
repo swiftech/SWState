@@ -42,7 +42,7 @@ stateBuilder
 StateMachine<String, Serializable> stateMachine = new StateMachine<>(stateBuilder);
 ```
 
-As you can see, we have set up 2 states and 4 actions to change states.
+As you can see, we have set up two states and four actions to change states.
 the method `in()` bind your actual processing code block
 
 
@@ -61,7 +61,7 @@ stateMachine.post(id, STATE_LOCKED);
 > If states change with payload, call `postWithPayload` methods with payload, like `postWithPayload(id, payload)`.
 
 
-If no ID is used to identify object, just call methods without ID:
+If no ID is used to identify an object, just call methods without ID:
 
 ```java
 stateMachine.start();
@@ -72,12 +72,12 @@ stateMachine.post(STATE_LOCKED);
 ```
 
 ### Trigger
-As of version 2.0, Trigger is introduced to provides automatically state transition. 
-Assume that the states transitions are determined just by some input, with trigger, you don't need to write the logic code by your own, it can be done automatically.
+As of version 2.0, Trigger is introduced to provide state transition automatically. 
+Assume that the state transitions are determined just by some input, with trigger, you don't need to write the logic code by your own, it can be done automatically.
 
 for example, by defining specific input to trigger the state transition:
 
-* first of all, define the actions like this:
+* first, define the actions like this:
 ```java
 stateBuilder
         ...
@@ -86,14 +86,14 @@ stateBuilder
         .action("coin_unlocked", STATE_UNLOCKED, STATE_UNLOCKED, stateBuilder.triggerBuilder().f(1.0f).build())
         .action("push_unlocked", STATE_LOCKED, STATE_LOCKED, stateBuilder.triggerBuilder().s("STRING1", "STRING2").build());
 ```
-* to activate the states transition automatically, just consume the input using `accept` method of `StateMachine` continuously:
+* to activate the state transition automatically, consume the input using `accept` method of `StateMachine` continuously:
 ```java
     stateMachine.accept('a'); // transit state from STATE_LOCKED to STATE_UNLOCKED
     stateMachine.accept(1); // transit state from STATE_UNLOCKED to STATE_LOCKED
     stateMachine.accept("unkown input") // THIS WON'T TRIGGER ANY STATE TRANSITION. 
 ```
 
-* of course, custom trigger can be defined to handle specific situation, eg:
+* of course, custom trigger can be defined to handle specific situations, eg:
 ```java
 .action("coin_locked", STATE_LOCKED, STATE_UNLOCKED, stateBuilder.triggerBuilder().c('a', 'A')
         .custom((data, payload) -> {
@@ -106,7 +106,7 @@ stateBuilder
 ## Advanced
 
 The `StateMachine` stores states in memory by default, if you want to store states into other storages like database or nosql,
-there are 2 ways to get this done, implement a `StateProvide` or use `StateTransition` directly.
+there are two ways to get this done, implement a `StateProvide` or use `StateTransition` directly.
 
 Example:
 Assume that we have a simplified online shopping order processing with some order states, as the diagram shows:
@@ -189,24 +189,25 @@ Second, use `stateTransition` to transit states which are loaded from other stor
 ```java
 public void pay(String id){
     String currentState = repository.getState(id); // repository is your own data access API
-    stateTransition.post(currentState, STATE_PAYED); // if current state is not 'Created', it fails as per previous setting
+    stateTransition.post(currentState, STATE_PAYED); // if the current state is not 'Created', it fails as per previous setting
 }
 ```
 
-### Maven
+### Exception handling
 
-* Stable version
-> Minimum JDK version is 8
-```xml
-<dependency>
-    <groupId>com.github.swiftech</groupId>
-    <artifactId>swstate</artifactId>
-    <version>1.1</version>
-</dependency>
+As of v2.1, you can set whether to throw an exception when an internal exception occurs by calling `setSilent()`.
+But you want to be notified when an exception occurs despite setting silence, call `setExceptionHandler()` to set an exception callback, eg:
+
+```java
+stateTransition.setSilent(true);
+stateTransition.setExceptionHandler(stateException -> {
+    System.out.println("exception: " + stateException.getMessage());
+});
 ```
 
-* Unstable version
-> Minimum JDK version is 17
+## Maven
+
+* Stable version
 
 ```xml
 <dependency>
@@ -215,3 +216,15 @@ public void pay(String id){
     <version>2.0.1</version>
 </dependency>
 ```
+
+* Unstable version
+
+```xml
+<dependency>
+    <groupId>com.github.swiftech</groupId>
+    <artifactId>swstate</artifactId>
+    <version>2.1</version>
+</dependency>
+```
+
+> The Minimum JDK version is 17, if you are still stuck on the JDK 8, please use v1.1

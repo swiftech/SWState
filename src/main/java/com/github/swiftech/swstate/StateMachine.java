@@ -115,7 +115,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     }
 
     /**
-     * Get Current state for default id.
+     * Get the current state for default id.
      *
      * @return
      */
@@ -238,7 +238,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     }
 
     /**
-     * Post current state to provided state without any payload for default id.
+     * Post current state to be provided state without any payload for default id.
      *
      * @param toState
      */
@@ -257,7 +257,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     }
 
     /**
-     * Post current state to provided state without any payload for {@code id}.
+     * Post current state to be provided state without any payload for {@code id}.
      *
      * @param id
      * @param toState
@@ -268,7 +268,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     }
 
     /**
-     * Post current state to provided state with payload for {@code id}.
+     * Post current state to be provided state with payload for {@code id}.
      *
      * @param id
      * @param toState
@@ -286,7 +286,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     }
 
     /**
-     * Accept data from client to trigger state transition.
+     * Accept data from the client to trigger state transition.
      *
      * @param data
      * @return true if data is accepted.
@@ -297,7 +297,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     }
 
     /**
-     * Accept data from client to trigger state transition.
+     * Accept data from the client to trigger state transition.
      *
      * @param id
      * @param data
@@ -309,7 +309,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     }
 
     /**
-     * Accept data from client to trigger state transition with payload.
+     * Accept data from the client to trigger state transition with payload.
      *
      * @param data
      * @param payload
@@ -321,7 +321,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     }
 
     /**
-     * Accept data from client to trigger state transition with payload.
+     * Accept data from the client to trigger state transition with payload.
      *
      * @param id
      * @param data
@@ -342,6 +342,24 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
             }
         }
         return false;
+    }
+
+    /**
+     * Handler to be notified when an internal exception occurs.
+     *
+     * @param exceptionHandler
+     */
+    public void setExceptionHandler(ExceptionHandler exceptionHandler) {
+        this.stateTransition.setExceptionHandler(exceptionHandler);
+    }
+
+    /**
+     * Set whether throws exception when an internal exception occurs.
+     *
+     * @param silent
+     */
+    public void setSilent(boolean silent) {
+        this.stateTransition.setSilent(silent);
     }
 
 }

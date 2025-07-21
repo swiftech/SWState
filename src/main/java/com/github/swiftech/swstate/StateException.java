@@ -3,7 +3,7 @@ package com.github.swiftech.swstate;
 /**
  * @author swiftech
  */
-public class StateException extends RuntimeException{
+public class StateException extends RuntimeException {
 
     public StateException() {
     }
