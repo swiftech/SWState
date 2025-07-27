@@ -105,11 +105,11 @@ stateBuilder
 
 ## Advanced
 
-The `StateMachine` stores states in memory by default, if you want to store states into other storages like database or nosql,
+The `StateMachine` stores states in memory by default, if you want to store states into other storages like RDB or nosql,
 there are two ways to get this done, implement a `StateProvide` or use `StateTransition` directly.
 
 Example:
-Assume that we have a simplified online shopping order processing with some order states, as the diagram shows:
+Assume that we have simplified online shopping order processing with some order states, as the diagram shows:
 
 ![](docs/state_machine2.png)
 
@@ -164,7 +164,7 @@ public class MyDatabaseStateProvider implements StateProvider<String> {
   public MyDatabaseStateProvider() {
       // do some necessary init
   }
-  ... // implement all methods for storing or retrieving state from database.
+  ... // implement all methods for storing or retrieving state from a database.
 }
 ```
 
@@ -227,4 +227,4 @@ stateTransition.setExceptionHandler(stateException -> {
 </dependency>
 ```
 
-> The Minimum JDK version is 17, if you are still stuck on the JDK 8, please use v1.1
+> The Minimum JDK version is 17. if you are still stuck on the JDK 8, please use v1.1
