@@ -10,7 +10,7 @@ import java.util.Optional;
 
 /**
  * Executes processes when state in or out.
- * all user data will be passed by payload of process.
+ * all user data will be passed by payload of a process.
  * Call {@code setSilent()} to set whether to throw an exception when an internal exception occurs.
  * If you want to be notified when an exception occurs despite setting silence, just call {@code setExceptionHandler()} to set an exception callback.
  *
@@ -118,7 +118,7 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
      */
     public void post(final S from, final S to, P payload) {
         Map<S, Action<S>> toMap = this.actionMap.get(from);
-        if (toMap == null) throw new StateException("No state transitions have been defined for state: " + from);
+        if (toMap == null) throw new StateException("No state transitions from '%s' have been defined.".formatted(from));
         Action<S> action = toMap.get(to);
         if (log.isDebugEnabled())
             log.debug(String.format("%s: '%s'[%s] -> '%s'", action == null ? "null" : action.getName(),
