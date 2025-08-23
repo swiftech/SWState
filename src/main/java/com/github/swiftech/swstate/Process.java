@@ -11,7 +11,7 @@ import java.io.Serializable;
 public interface Process<P extends Serializable> {
 
 	/**
-	 * Execute process with a payload.
+	 * Execute the process with a payload.
 	 *
 	 * @param payload
 	 */

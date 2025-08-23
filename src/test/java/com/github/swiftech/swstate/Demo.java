@@ -26,11 +26,11 @@ public class Demo {
         stateBuilder
                 .state(STATE_CREATED)
                 .in(order -> {
-                    // Handle the order is created .
+                    // Handle the order is created.
                 })
                 .state(STATE_PAYED)
                 .in(order -> {
-                    // Handle the order is payed.
+                    // Handle the order is paid.
                 })
                 .state(STATE_CANCELED)
                 .in(order -> {

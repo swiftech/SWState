@@ -34,6 +34,12 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
     // if false, a {@link StateException} throws.
     private boolean isSilent = true;
 
+    // @since 2.2, if true, the IN process will not be executed for self-circulation state transition.
+    private boolean isNoInProcessForSelfCirculation = false;
+
+    // @since 2.2, if true, the OUT process will not be executed for self-circulation state transition.
+    private boolean isNoOutProcessForSelfCirculation = false;
+
     /**
      * Construct state transition with state builder.
      *
@@ -118,10 +124,11 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
      */
     public void post(final S from, final S to, P payload) {
         Map<S, Action<S>> toMap = this.actionMap.get(from);
-        if (toMap == null) throw new StateException("No state transitions from '%s' have been defined.".formatted(from));
+        if (toMap == null)
+            throw new StateException("No state transitions from '%s' have been defined.".formatted(from));
         Action<S> action = toMap.get(to);
         if (log.isDebugEnabled())
-            log.debug(String.format("%s: '%s'[%s] -> '%s'", action == null ? "null" : action.getName(),
+            log.debug(String.format("%s: '%s'(%s) -> '%s'", action == null ? "null" : action.getName(),
                     from, Utils.payloadSummary(payload), to));
         this.doPost(from, to, payload);
     }
@@ -139,30 +146,41 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
             throw new RuntimeException(String.format("Changing state from '%s' to '%s' is not allowed.", from, to));
         }
 
-        // Handle OUT 'from' state
-        if (from != null) {
-            List<Process<P>> outProcesses = stateMapping.getOut(from);
-            if (outProcesses == null || outProcesses.isEmpty()) {
-                if (log.isTraceEnabled())
-                    log.trace(String.format("No actions to execute for exiting state '%s'", from));
-            }
-            else {
-                if (log.isDebugEnabled())
-                    log.debug(String.format("Execute %d actions for exiting state '%s' ", outProcesses.size(), from));
-                execProcesses(outProcesses, payload);
+        if (isNoOutProcessForSelfCirculation && from == to) {
+            log.info("Ignore executing OUT process from state %s to state %s".formatted(from, to));
+        }
+        else {
+            // Handle OUT 'from' state
+            if (from != null) {
+                List<Process<P>> outProcesses = stateMapping.getOut(from);
+                if (outProcesses == null || outProcesses.isEmpty()) {
+                    if (log.isTraceEnabled())
+                        log.trace(String.format("No actions to execute for exiting state '%s'", from));
+                }
+                else {
+                    if (log.isDebugEnabled())
+                        log.debug(String.format("Execute %d actions for exiting state '%s' ", outProcesses.size(), from));
+                    execProcesses(outProcesses, payload);
+                }
             }
         }
 
-        // Handle IN 'to' state
-        List<Process<P>> inProcesses = stateMapping.getIn(to);
-        if (inProcesses == null || inProcesses.isEmpty()) {
-            if (log.isTraceEnabled()) log.trace(String.format("No actions to execute for entering state '%s'", to));
+        if (isNoInProcessForSelfCirculation && from == to) {
+            log.info("Ignore executing IN process from state %s to state %s".formatted(from, to));
         }
         else {
-            if (log.isDebugEnabled())
-                log.debug(String.format("Execute %d actions for entering state '%s' ", inProcesses.size(), to));
-            execProcesses(inProcesses, payload);
+            // Handle IN 'to' state
+            List<Process<P>> inProcesses = stateMapping.getIn(to);
+            if (inProcesses == null || inProcesses.isEmpty()) {
+                if (log.isTraceEnabled()) log.trace(String.format("No actions to execute for entering state '%s'", to));
+            }
+            else {
+                if (log.isDebugEnabled())
+                    log.debug(String.format("Execute %d actions for entering state '%s' ", inProcesses.size(), to));
+                execProcesses(inProcesses, payload);
+            }
         }
+
     }
 
     private void execProcesses(List<Process<P>> processes, P payload) {
@@ -219,5 +237,13 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
      */
     public void setSilent(boolean silent) {
         isSilent = silent;
+    }
+
+    public void setNoInProcessForSelfCirculation(boolean noInProcessForSelfCirculation) {
+        isNoInProcessForSelfCirculation = noInProcessForSelfCirculation;
+    }
+
+    public void setNoOutProcessForSelfCirculation(boolean noOutProcessForSelfCirculation) {
+        isNoOutProcessForSelfCirculation = noOutProcessForSelfCirculation;
     }
 }

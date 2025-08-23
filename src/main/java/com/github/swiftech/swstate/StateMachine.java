@@ -247,7 +247,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     }
 
     /**
-     * Post current state to provided state with payload for default id.
+     * Post current state to be provided state with payload for default id.
      *
      * @param toState
      * @param payload
@@ -268,6 +268,77 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
     }
 
     /**
+     * Post to the target state based on the current state and the condition state provided.
+     * If the current state is not matched to the conditional state, nothing will happen.
+     *
+     * @param toState
+     * @param conditionState
+     */
+    public void postOnState(final S toState, final S conditionState) {
+        this.postOnState(DEFAULT_ID, toState, conditionState);
+    }
+
+    /**
+     * Post to the target state based on the current state and the condition states provided.
+     * If no state matches, nothing will happen.
+     *
+     * @param toState1
+     * @param conditionState1 Conditional state to state 1
+     * @param toState2
+     * @param conditionState2 Conditional state to state 1
+     */
+    public void postOnState(final S toState1, final S conditionState1, final S toState2, final S conditionState2) {
+        this.postOnState(DEFAULT_ID, toState1, conditionState1, toState2, conditionState2);
+    }
+
+    /**
+     * Determine the target state of the current state according to the provided conditional state mapping,
+     * and post the current state carrying the payload into the target state.
+     * If no state matches, nothing will happen.
+     *
+     * @param conditionStateMap Conditional state mapping used to determine the target state based on the current state
+     */
+    public void postOnState(Map<S, S> conditionStateMap) {
+        this.postWithPayloadOnState(DEFAULT_ID, conditionStateMap, null);
+    }
+
+    /**
+     * Post to the target state based on the current state and the condition state provided.
+     * If the current state is not matched to the conditional state, nothing will happen.
+     *
+     * @param toState
+     * @param conditionState
+     */
+    public void postOnState(String id, final S toState, final S conditionState) {
+        this.postWithPayloadOnState(id, toState, conditionState, null);
+    }
+
+    /**
+     * Post to the target state based on the current state and the condition states provided.
+     * If no state matches, nothing will happen.
+     *
+     * @param toState1
+     * @param conditionState1 Conditional state to state 1
+     * @param toState2
+     * @param conditionState2 Conditional state to state 1
+     */
+    public void postOnState(String id, final S toState1, final S conditionState1, final S toState2, final S conditionState2) {
+        this.postWithPayloadOnState(id, toState1, conditionState1, toState2, conditionState2, null);
+    }
+
+    /**
+     * Determine the target state of the current state according to the provided conditional state mapping,
+     * and post the current state carrying the payload into the target state.
+     * If no state matches, nothing will happen.
+     *
+     * @param id
+     * @param conditionStateMap Conditional state mapping used to determine the target state based on the current state
+     */
+    public void postOnState(String id, Map<S, S> conditionStateMap) {
+        this.postWithPayloadOnState(id, conditionStateMap, null);
+    }
+
+    /**
      * Post current state to be provided state with payload for {@code id}.
      *
      * @param id
@@ -283,6 +354,86 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
         }
         stateTransition.post(currentState, toState, payload);
         stateProvider.setState(id, toState);
+    }
+
+    /**
+     * Post to the target state based on the current state and the condition state provided.
+     * If the current state is not matched to the conditional state, nothing will happen.
+     *
+     * @param toState
+     * @param conditionState
+     * @param payload
+     */
+    public void postWithPayloadOnState(final S toState, final S conditionState, P payload) {
+        this.postWithPayloadOnState(DEFAULT_ID, toState, conditionState, payload);
+    }
+
+    /**
+     * Post to the target state based on the current state and the condition state provided.
+     * If the current state is not matched to the conditional state, nothing will happen.
+     *
+     * @param id
+     * @param toState
+     * @param conditionState
+     * @param payload
+     */
+    public void postWithPayloadOnState(String id, final S toState, final S conditionState, P payload) {
+        if (this.isState(conditionState)) {
+            this.postWithPayload(id, toState, payload);
+        }
+    }
+
+    /**
+     * Post to the target state based on the current state and the condition states provided.
+     * If no state matches, nothing will happen.
+     *
+     * @param toState1
+     * @param conditionState1 Conditional state to state 1
+     * @param toState2
+     * @param conditionState2 Conditional state to state 1
+     * @param payload
+     */
+    public void postWithPayloadOnState(final S toState1, final S conditionState1, final S toState2, final S conditionState2, P payload) {
+        this.postWithPayloadOnState(DEFAULT_ID, toState1, conditionState1, toState2, conditionState2, payload);
+    }
+
+    /**
+     * Post to the target state based on the current state and the condition states provided.
+     * If no state matches, nothing will happen.
+     *
+     * @param id
+     * @param toState1
+     * @param conditionState1 Conditional state to state 1
+     * @param toState2
+     * @param conditionState2 Conditional state to state 1
+     * @param payload
+     */
+    public void postWithPayloadOnState(String id, final S toState1, final S conditionState1, final S toState2, final S conditionState2, P payload) {
+        if (this.isState(conditionState1)) {
+            this.postWithPayload(id, toState1, payload);
+        }
+        else if (this.isState(conditionState2)) {
+            this.postWithPayload(id, toState2, payload);
+        }
+    }
+
+    /**
+     * Determine the target state of the current state according to the provided conditional state mapping,
+     * and post the current state carrying the payload into the target state.
+     * If no state matches, nothing will happen.
+     *
+     * @param id
+     * @param conditionStateMap Conditional state mapping used to determine the target state based on the current state
+     * @param payload
+     */
+    public void postWithPayloadOnState(String id, Map<S, S> conditionStateMap, P payload) {
+        S targetState = conditionStateMap.get(this.getCurrentState());
+        if (targetState != null) {
+            this.postWithPayload(id, targetState, payload);
+        }
+        else {
+            log.debug("No target state found for current state %s".formatted(this.getCurrentState()));
+        }
     }
 
     /**
@@ -336,7 +487,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
                 if (log.isDebugEnabled())
                     log.debug("Accept '%s' with payload '%s'".formatted(data, Utils.payloadSummary(payload)));
                 S stateTo = toByTriggerMap.get(trigger);
-                // transit to next state
+                // transit to the next state
                 this.postWithPayload(id, stateTo, payload);
                 return true;
             }
@@ -362,4 +513,12 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
         this.stateTransition.setSilent(silent);
     }
 
+    public void setNoInProcessForSelfCirculation(boolean noIntOutForSelfCirculation) {
+        this.stateTransition.setNoInProcessForSelfCirculation(noIntOutForSelfCirculation);
+    }
+
+
+    public void setNoOutProcessForSelfCirculation(boolean noOutProcessForSelfCirculation) {
+        this.stateTransition.setNoOutProcessForSelfCirculation(noOutProcessForSelfCirculation);
+    }
 }
