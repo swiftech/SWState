@@ -239,10 +239,22 @@ public class StateTransition<S extends Serializable, P extends Serializable> {
         isSilent = silent;
     }
 
+    /**
+     * if true, the IN process will not be executed for self-circulation state transition.
+     *
+     * @param noInProcessForSelfCirculation
+     * @since 2.2
+     */
     public void setNoInProcessForSelfCirculation(boolean noInProcessForSelfCirculation) {
         isNoInProcessForSelfCirculation = noInProcessForSelfCirculation;
     }
 
+    /**
+     * if true, the OUT process will not be executed for self-circulation state transition.
+     *
+     * @param noOutProcessForSelfCirculation
+     * @since 2.2
+     */
     public void setNoOutProcessForSelfCirculation(boolean noOutProcessForSelfCirculation) {
         isNoOutProcessForSelfCirculation = noOutProcessForSelfCirculation;
     }

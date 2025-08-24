@@ -16,14 +16,16 @@ import java.util.Map;
  * <p>
  * Usage:
  * <pre>
- *     1. Construct {@link StateMachine} with (default) or without {@link StateProvider}.
- *     2. Define states and actions by {@link StateBuilder}.
- *     3. Build the {@link StateMachine} instance from {@link StateBuilder}.
- *     4. Start the {@link StateBuilder} and post state transition request.
+ *     1. Define states and actions by {@link StateBuilder}.
+ *     2. Define your own {@link StateProvider} if required.
+ *     3. Construct the {@link StateMachine} instance from {@link StateBuilder} with or without customized {@link StateProvider}.
+ *     4. Start the {@link StateMachine}.
+ *     5. Post state transition request at anywhere you want to transit states.
  * </pre>
  *
  * @param <S> type of State
  * @param <P> type of Payload
+ * @see StateBuilder
  * @author swiftech
  */
 public class StateMachine<S extends Serializable, P extends Serializable> {
@@ -513,11 +515,22 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
         this.stateTransition.setSilent(silent);
     }
 
-    public void setNoInProcessForSelfCirculation(boolean noIntOutForSelfCirculation) {
-        this.stateTransition.setNoInProcessForSelfCirculation(noIntOutForSelfCirculation);
+    /**
+     * if true, the IN process will not be executed for self-circulation state transition.
+     *
+     * @param noInProcessForSelfCirculation
+     * @since 2.2
+     */
+    public void setNoInProcessForSelfCirculation(boolean noInProcessForSelfCirculation) {
+        this.stateTransition.setNoInProcessForSelfCirculation(noInProcessForSelfCirculation);
     }
 
-
+    /**
+     * if true, the OUT process will not be executed for self-circulation state transition.
+     *
+     * @param noOutProcessForSelfCirculation
+     * @since 2.2
+     */
     public void setNoOutProcessForSelfCirculation(boolean noOutProcessForSelfCirculation) {
         this.stateTransition.setNoOutProcessForSelfCirculation(noOutProcessForSelfCirculation);
     }
