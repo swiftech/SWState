@@ -59,7 +59,7 @@ stateMachine.post(id, STATE_LOCKED);
 
 > The parameter `id` of `start()` or `post()` identifies the object that using this state machine, which means different ids have their own state.
 > If states change with payload, call `postWithPayload` methods with payload, like `postWithPayload(id, payload)`.
-
+> As of v2.2, If states change on current state conditionally, use `postOnState` and `postWithPayloadOnState` methods.
 
 If no ID is used to identify an object, just call methods without ID:
 
@@ -196,7 +196,7 @@ public void pay(String id){
 ### Exception handling
 
 As of v2.1, you can set whether to throw an exception when an internal exception occurs by calling `setSilent()`.
-But you want to be notified when an exception occurs despite setting silence, call `setExceptionHandler()` to set an exception callback, eg:
+But you want to be notified when an exception occurs despite setting silence, call `setExceptionHandler()` to set an exception callback, e.g.:
 
 ```java
 stateTransition.setSilent(true);
@@ -204,6 +204,11 @@ stateTransition.setExceptionHandler(stateException -> {
     System.out.println("exception: " + stateException.getMessage());
 });
 ```
+
+### IN/OUT process on self-circulation
+By default, a self-circulation state transition still causes the IN/OUT processes to be executed. 
+However, if you want to disable this default behavior in some cases, As of v2.2, the SWState allows you to control the IN/OUT processes for self-circulation state transition. 
+Use `setNoInProcessForSelfCirculation()` and `setNoOutProcessForSelfCirculation()` to set whether the IN/OUT processes will be executed for self-circulation state transition.
 
 ## Maven
 
@@ -223,7 +228,7 @@ stateTransition.setExceptionHandler(stateException -> {
 <dependency>
     <groupId>com.github.swiftech</groupId>
     <artifactId>swstate</artifactId>
-    <version>2.1</version>
+    <version>2.2</version>
 </dependency>
 ```
 
