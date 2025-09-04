@@ -275,6 +275,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      *
      * @param toState
      * @param conditionState
+     * @since 2.2
      */
     public void postOnState(final S toState, final S conditionState) {
         this.postOnState(DEFAULT_ID, toState, conditionState);
@@ -288,6 +289,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      * @param conditionState1 Conditional state to state 1
      * @param toState2
      * @param conditionState2 Conditional state to state 1
+     * @since 2.2
      */
     public void postOnState(final S toState1, final S conditionState1, final S toState2, final S conditionState2) {
         this.postOnState(DEFAULT_ID, toState1, conditionState1, toState2, conditionState2);
@@ -298,7 +300,9 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      * and post the current state carrying the payload into the target state.
      * If no state matches, nothing will happen.
      *
-     * @param conditionStateMap Conditional state mapping used to determine the target state based on the current state
+     * @param conditionStateMap Conditional state mapping used to determine the target state based on the current state,
+     *                          the key is the condition state, the value is the target state.
+     * @since 2.2
      */
     public void postOnState(Map<S, S> conditionStateMap) {
         this.postWithPayloadOnState(DEFAULT_ID, conditionStateMap, null);
@@ -310,6 +314,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      *
      * @param toState
      * @param conditionState
+     * @since 2.2
      */
     public void postOnState(String id, final S toState, final S conditionState) {
         this.postWithPayloadOnState(id, toState, conditionState, null);
@@ -323,6 +328,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      * @param conditionState1 Conditional state to state 1
      * @param toState2
      * @param conditionState2 Conditional state to state 1
+     * @since 2.2
      */
     public void postOnState(String id, final S toState1, final S conditionState1, final S toState2, final S conditionState2) {
         this.postWithPayloadOnState(id, toState1, conditionState1, toState2, conditionState2, null);
@@ -334,7 +340,9 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      * If no state matches, nothing will happen.
      *
      * @param id
-     * @param conditionStateMap Conditional state mapping used to determine the target state based on the current state
+     * @param conditionStateMap Conditional state mapping used to determine the target state based on the current state,
+     *                          the key is the condition state, the value is the target state.
+     * @since 2.2
      */
     public void postOnState(String id, Map<S, S> conditionStateMap) {
         this.postWithPayloadOnState(id, conditionStateMap, null);
@@ -365,6 +373,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      * @param toState
      * @param conditionState
      * @param payload
+     * @since 2.2
      */
     public void postWithPayloadOnState(final S toState, final S conditionState, P payload) {
         this.postWithPayloadOnState(DEFAULT_ID, toState, conditionState, payload);
@@ -378,6 +387,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      * @param toState
      * @param conditionState
      * @param payload
+     * @since 2.2
      */
     public void postWithPayloadOnState(String id, final S toState, final S conditionState, P payload) {
         if (this.isState(conditionState)) {
@@ -394,6 +404,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      * @param toState2
      * @param conditionState2 Conditional state to state 1
      * @param payload
+     * @since 2.2
      */
     public void postWithPayloadOnState(final S toState1, final S conditionState1, final S toState2, final S conditionState2, P payload) {
         this.postWithPayloadOnState(DEFAULT_ID, toState1, conditionState1, toState2, conditionState2, payload);
@@ -409,6 +420,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      * @param toState2
      * @param conditionState2 Conditional state to state 1
      * @param payload
+     * @since 2.2
      */
     public void postWithPayloadOnState(String id, final S toState1, final S conditionState1, final S toState2, final S conditionState2, P payload) {
         if (this.isState(conditionState1)) {
@@ -416,6 +428,9 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
         }
         else if (this.isState(conditionState2)) {
             this.postWithPayload(id, toState2, payload);
+        }
+        else {
+            log.debug("No target state found for current state %s".formatted(this.getCurrentState()));
         }
     }
 
@@ -427,6 +442,7 @@ public class StateMachine<S extends Serializable, P extends Serializable> {
      * @param id
      * @param conditionStateMap Conditional state mapping used to determine the target state based on the current state
      * @param payload
+     * @since 2.2
      */
     public void postWithPayloadOnState(String id, Map<S, S> conditionStateMap, P payload) {
         S targetState = conditionStateMap.get(this.getCurrentState());
