@@ -1,5 +1,9 @@
 # Changelogs
 
+## V2.2.1
+* fix: logs for missing condition state.
+* update javadoc.
+
 ## v2.2
 * add more conditional `post*` methods to `StateMachine` to transit states conditionally on current state.
 * add `setNoInProcessForSelfCirculation()` and `setNoOutProcessForSelfCirculation()` to set whether the IN/OUT processes will be executed for self-circulation state transition.

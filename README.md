@@ -228,7 +228,7 @@ Use `setNoInProcessForSelfCirculation()` and `setNoOutProcessForSelfCirculation(
 <dependency>
     <groupId>com.github.swiftech</groupId>
     <artifactId>swstate</artifactId>
-    <version>2.2</version>
+    <version>2.2.1</version>
 </dependency>
 ```
 
